@@ -1,0 +1,55 @@
+{
+  "name": "adopt-me",
+  "version": "1.0.0",
+  "description": "This project is a RESTful API built with Node.js, Express, and TypeScript to manage a catalog of pets available for adoption.",
+  "main": "dist/app.js",
+  "scripts": {
+    "test": "jest --coverage",
+    "start": "node dist/app.js",
+    "dev": "ts-node-dev --respawn --transpile-only src/app.ts",
+    "build": "tsc",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "typecheck": "tsc --noEmit",
+    "prepare": "husky"
+  },
+  "keywords": [],
+  "author": "Leonardo Juan Pablo Valdez",
+  "license": "ISC",
+  "dependencies": {
+    "@types/dotenv": "^8.2.3",
+    "compression": "^1.8.0",
+    "cookie-parser": "^1.4.7",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "faker": "^5.5.3",
+    "jest": "^29.7.0",
+    "mongoose": "^8.10.1",
+    "pm2": "^5.4.3"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.20.0",
+    "@types/cookie-parser": "^1.4.8",
+    "@types/express": "^5.0.0",
+    "@typescript-eslint/eslint-plugin": "latest",
+    "@typescript-eslint/parser": "latest",
+    "eslint": "^9.20.1",
+    "eslint-config-prettier": "latest",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
+    "globals": "^16.0.0",
+    "husky": "^9.1.7",
+    "jiti": "^2.4.2",
+    "lint-staged": "^15.4.3",
+    "prettier": "^3.5.1",
+    "ts-node": "^10.9.2",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.7.3",
+    "typescript-eslint": "^8.24.1"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ]
+  }
+}
