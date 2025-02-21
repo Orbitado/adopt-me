@@ -45,8 +45,8 @@ This project is a **RESTful API** built with **Node.js, Express, and TypeScript*
 ### 3.1 Clone the Repository  
 
 ```bash
-git clone https://github.com/your-username/pet-adoption-api.git
-cd pet-adoption-api
+git clone https://github.com/Orbitado/adopt-me.git
+cd adopt-me
 ```
 
 ### 3.2 Install Dependencies  
@@ -57,12 +57,6 @@ Using npm:
 npm install
 ```
 
-Or using yarn:  
-
-```bash
-yarn install
-```
-
 ### 3.3 Configure Environment Variables  
 
 Create a `.env` file in the root directory:  
@@ -70,7 +64,7 @@ Create a `.env` file in the root directory:
 ```ini
 PORT=3000
 NODE_ENV=development
-JWT_SECRET=your_secret_key
+JWT_SECRET=<your_secret_key>
 ```
 
 ---
@@ -98,174 +92,9 @@ JWT_SECRET=your_secret_key
 
 ---
 
-## 5. TypeScript Configuration  
+## 5. Running and Deployment  
 
-A basic `tsconfig.json` file:  
-
-```json
-{
-  "compilerOptions": {
-    "target": "ES2020",
-    "module": "commonjs",
-    "outDir": "./dist",
-    "rootDir": "./src",
-    "strict": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true
-  },
-  "include": ["src"],
-  "exclude": ["node_modules", "**/*.test.ts"]
-}
-```
-
----
-
-## 6. Error Handling Middleware  
-
-Create `src/middlewares/errorHandler.ts`:  
-
-```typescript
-import { Request, Response, NextFunction } from 'express';
-
-export function errorHandler(err: any, req: Request, res: Response, next: NextFunction): void {
-  console.error(err.stack);
-  res.status(err.status || 500).json({
-    message: err.message || 'Internal Server Error',
-    ...(process.env.NODE_ENV === 'development' && { stack: err.stack }),
-  });
-}
-```
-
-Then, register it in `src/app.ts`:  
-
-```typescript
-import express from 'express';
-import compression from 'compression';
-import { errorHandler } from './middlewares/errorHandler';
-import routes from './routes';
-
-const app = express();
-
-app.use(express.json());
-app.use(compression());
-app.use('/api', routes);
-
-// Error Handling Middleware
-app.use(errorHandler);
-
-export default app;
-```
-
----
-
-## 7. Response Compression  
-
-Enable **Gzip compression** using the `compression` package:  
-
-```typescript
-app.use(compression());
-```
-
-This reduces response size and improves API performance, especially for JSON responses.  
-
----
-
-## 8. Clustering with Node.js  
-
-To leverage multiple CPU cores, modify `src/server.ts`:  
-
-```typescript
-import cluster from 'cluster';
-import os from 'os';
-import app from './app';
-
-const PORT = process.env.PORT || 3000;
-
-function startServer(): void {
-  app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT} – PID: ${process.pid}`);
-  });
-}
-
-if (cluster.isMaster) {
-  const numCPUs = os.cpus().length;
-  console.log(`Master ${process.pid} is running. Spawning ${numCPUs} workers...`);
-
-  for (let i = 0; i < numCPUs; i++) {
-    cluster.fork();
-  }
-
-  cluster.on('exit', (worker, code, signal) => {
-    console.log(`Worker ${worker.process.pid} died. Restarting...`);
-    cluster.fork();
-  });
-} else {
-  startServer();
-}
-```
-
-This launches a worker process per CPU core, improving concurrent request handling.  
-
----
-
-## 9. Automated Testing with Mocks and Faker  
-
-### 9.1 Install Testing Dependencies  
-
-```bash
-npm install --save-dev jest ts-jest @types/jest supertest @faker-js/faker
-```
-
-Configure Jest (`jest.config.js`):  
-
-```javascript
-module.exports = {
-  preset: 'ts-jest',
-  testEnvironment: 'node',
-  testMatch: ['**/tests/**/*.test.ts'],
-};
-```
-
-### 9.2 API Endpoint Test Example  
-
-Create `src/tests/pets.test.ts`:  
-
-```typescript
-import request from 'supertest';
-import app from '../app';
-import { faker } from '@faker-js/faker';
-
-describe('GET /api/pets', () => {
-  it('should return a list of pets', async () => {
-    const res = await request(app).get('/api/pets');
-    expect(res.statusCode).toBe(200);
-    expect(Array.isArray(res.body)).toBe(true);
-  });
-});
-
-describe('POST /api/pets', () => {
-  it('should add a new pet and return its data', async () => {
-    const newPet = {
-      name: faker.animal.cat(),
-      species: 'Cat',
-      age: faker.datatype.number({ min: 1, max: 15 }),
-      description: faker.lorem.sentence(),
-    };
-
-    const res = await request(app).post('/api/pets').send(newPet);
-    expect(res.statusCode).toBe(201);
-    expect(res.body).toHaveProperty('id');
-    expect(res.body.name).toBe(newPet.name);
-  });
-});
-```
-
----
-
-## 10. Running and Deployment  
-
-### 10.1 Add Scripts to `package.json`  
+### 5.1 Add Scripts to `package.json`  
 
 ```json
 {
@@ -278,7 +107,7 @@ describe('POST /api/pets', () => {
 }
 ```
 
-### 10.2 Deploy to Production  
+### 5.2 Deploy to Production  
 
 1. Build the project:  
    ```bash
@@ -293,7 +122,7 @@ For production, consider using **PM2** for process management.
 
 ---
 
-## 11. Best Practices  
+## 6. Best Practices  
 
 - **Use ESLint & Prettier** for code consistency.
 - **Store sensitive data in `.env`**, never hardcode credentials.
