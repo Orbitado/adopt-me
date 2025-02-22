@@ -1,10 +1,15 @@
 import express from "express";
 import cookieParser from "cookie-parser";
-import dotenv from "dotenv";
+import compression from "compression";
+import { connectDb } from "./config/database";
+import { ENV } from "./config/dotenv";
 // import { errorHandler } from "@/middlewares/error-handler";
 // import { notFoundHandler } from "@/middlewares/not-found-handler";
 
-dotenv.config();
+// Remove this as we're using our custom dotenv config
+// dotenv.config();
+
+connectDb();
 
 // import usersRouter from './routes/users.router.js';
 // import petsRouter from './routes/pets.router.js';
@@ -12,17 +17,13 @@ dotenv.config();
 // import sessionsRouter from './routes/sessions.router.js';
 
 const app = express();
-const PORT = process.env["PORT"];
+const { PORT } = ENV;
 
+// Use PORT from our ENV config instead
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
-
-// Primero van todas las rutas
-// app.use('/api/users',usersRouter);
-// ... otras rutas ...
-
-// El error handler va al final
+app.use(compression());
 
 // app.use('/api/users',usersRouter);
 // app.use('/api/pets',petsRouter);
