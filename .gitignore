@@ -14,6 +14,9 @@ yarn-error.log*
 
 # Environment variables
 .env
+.env.development
+.env.test
+.env.production
 
 # IDEs and editors
 .vscode/
