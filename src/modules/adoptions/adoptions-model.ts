@@ -1,6 +1,6 @@
 import { Schema, model } from "mongoose";
 
-interface IAdoption {
+export interface IAdoption {
   petId: Schema.Types.ObjectId;
   userId: Schema.Types.ObjectId;
   adoptionDate: Date;
