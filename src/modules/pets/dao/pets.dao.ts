@@ -1,7 +1,7 @@
 import { Model } from "mongoose";
-import Pet from "@/modules/pets/pets-model";
+import Pet from "@/modules/pets/pets.model";
 import { CreatePetDTO, UpdatePetDTO } from "@/modules/pets/dto/pet.dto";
-import { IPet } from "@/modules/pets/pets-model";
+import { IPet } from "@/modules/pets/pets.model";
 
 export class PetsDAO {
   constructor(private readonly model: Model<IPet>) {}

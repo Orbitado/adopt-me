@@ -1,10 +1,10 @@
 import { Model } from "mongoose";
-import Adoption from "@/modules/adoptions/adoptions-model";
+import Adoption from "@/modules/adoptions/adoptions.model";
 import {
   CreateAdoptionDTO,
   UpdateAdoptionDTO,
 } from "@/modules/adoptions/dto/adoption.dto";
-import { IAdoption } from "@/modules/adoptions/adoptions-model";
+import { IAdoption } from "@/modules/adoptions/adoptions.model";
 
 export class AdoptionsDAO {
   constructor(private readonly model: Model<IAdoption>) {}
