@@ -25,5 +25,5 @@ export const notFoundHandler = (
     },
   };
 
-  return res.status(errorResponse.status).json(errorResponse);
+  res.status(errorResponse.status).json(errorResponse);
 };

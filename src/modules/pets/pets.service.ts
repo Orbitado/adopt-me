@@ -1,5 +1,5 @@
-import { petsDAO } from "@/modules/pets/dao/pets.dao";
-import { CreatePetDTO, UpdatePetDTO } from "@/modules/pets/dto/pet.dto";
+import { petsDAO } from "./dao/pets.dao";
+import { CreatePetDTO, UpdatePetDTO } from "./dto/pet.dto";
 
 export class PetsService {
   async createPet(petData: CreatePetDTO) {
