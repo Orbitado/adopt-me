@@ -20,12 +20,12 @@ const adoptionSchema = new Schema<IAdoption>({
   },
   adoptionDate: {
     type: Date,
-    required: true,
+    required: false,
     default: Date.now,
   },
   status: {
     type: String,
-    required: true,
+    required: false,
     enum: ["pending", "approved", "rejected"],
     default: "pending",
   },

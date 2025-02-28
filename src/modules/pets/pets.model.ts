@@ -7,6 +7,7 @@ export interface IPet {
   gender: string;
   size: string;
   description: string;
+  isAdopted: boolean;
 }
 
 const petSchema = new Schema<IPet>({
@@ -50,6 +51,10 @@ const petSchema = new Schema<IPet>({
     minlength: [10, "Description must be at least 10 characters long"],
     maxlength: [500, "Description must be less than 500 characters"],
     default: "No description provided",
+  },
+  isAdopted: {
+    type: Boolean,
+    default: false,
   },
 });
 
