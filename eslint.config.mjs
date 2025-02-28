@@ -5,6 +5,16 @@ import tseslint from "typescript-eslint";
 /** @type {import("eslint").Linter.Config[]} */
 export default [
   {
+    ignores: [
+      "**/node_modules/**",
+      "**/dist/**",
+      "**/build/**",
+      "**/coverage/**",
+      "**/*.js.map",
+      ".husky/**",
+    ],
+  },
+  {
     files: ["**/*.{js,mjs,cjs,ts}"],
     languageOptions: {
       globals: {

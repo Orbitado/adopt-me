@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { Request, Response, NextFunction } from "express";
 import { ErrorResponse } from "../types/types";
+import { ErrorDictionary } from "../utils/error-dictionary";
 
 export const notFoundHandler = (
   req: Request,
@@ -11,19 +12,26 @@ export const notFoundHandler = (
     `[${new Date().toISOString()}] 404 Not Found: ${req.method} ${req.url}`,
   );
 
-  const statusCode = 404;
+  const details = {
+    path: req.url,
+    method: req.method,
+  };
+
+  const customError = ErrorDictionary.resourceNotFound(
+    "Resource",
+    undefined,
+    details,
+  );
 
   const errorResponse: ErrorResponse = {
-    status: statusCode,
-    message: "Resource not found",
+    status: customError.status || 404,
+    message: customError.message || "Resource not found",
     error: {
-      name: "NotFoundError",
-      details: {
-        path: req.url,
-        method: req.method,
-      },
+      name: customError.name,
+      code: customError.code,
+      details: customError.details,
     },
   };
 
-  return res.status(errorResponse.status).json(errorResponse);
+  res.status(errorResponse.status).json(errorResponse);
 };

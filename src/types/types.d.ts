@@ -14,3 +14,9 @@ export interface ErrorResponse {
     details?: unknown;
   };
 }
+
+export interface ValidationError extends Error {
+  name: string;
+  message: string;
+  errors?: Record<string, unknown>;
+}

@@ -1,0 +1,8 @@
+# Ignorar archivos de construcción
+dist/
+node_modules/
+coverage/
+build/
+.husky/
+*.js.map
+package-lock.json 
