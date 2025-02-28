@@ -20,6 +20,7 @@ export const createPetSchema = z.object({
     .string()
     .min(10, "Description must be at least 10 characters long")
     .max(500, "Description must be less than 500 characters"),
+  isAdopted: z.boolean().optional(),
 });
 
 export const updatePetSchema = createPetSchema.partial();
