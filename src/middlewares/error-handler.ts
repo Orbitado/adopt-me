@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { Request, Response, NextFunction, ErrorRequestHandler } from "express";
-import { CustomError, ErrorResponse } from "../types/types";
+import { CustomError, ErrorResponse, ValidationError } from "../types/types";
 
 export const errorHandler: ErrorRequestHandler = (
   error: Error,
@@ -8,23 +8,38 @@ export const errorHandler: ErrorRequestHandler = (
   res: Response,
   _next: NextFunction,
 ) => {
+  const err = error as ValidationError;
+  let customError = error as CustomError;
+
+  if (
+    err.name === "ValidationError" ||
+    err.message?.includes("validation failed")
+  ) {
+    customError = {
+      ...error,
+      status: 400,
+      code: "VALIDATION_ERROR",
+      details: err.errors || {},
+    };
+  }
+
   console.error(
     `[${new Date().toISOString()}] ERROR: ${req.method} ${req.url}\n` +
-      `Message: ${error.message}\n` +
-      `Status: ${(error as CustomError).status || 500}\n` +
-      `Code: ${(error as CustomError).code || "No error code"}\n` +
-      `Details: ${JSON.stringify((error as CustomError).details || {}, null, 2)}`,
+      `Message: ${customError.message}\n` +
+      `Status: ${customError.status || 500}\n` +
+      `Code: ${customError.code || "No error code"}\n` +
+      `Details: ${JSON.stringify(customError.details || {}, null, 2)}`,
   );
 
-  const statusCode = (error as CustomError).status || 500;
+  const statusCode = customError.status || 500;
 
   const errorResponse: ErrorResponse = {
     status: statusCode,
-    message: error.message || "Internal Server Error",
+    message: customError.message || "Internal Server Error",
     error: {
-      name: error.name,
-      code: (error as CustomError).code,
-      details: (error as CustomError).details,
+      name: customError.name,
+      code: customError.code,
+      details: customError.details,
     },
   };
 
