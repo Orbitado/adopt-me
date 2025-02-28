@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { Request, Response, NextFunction, ErrorRequestHandler } from "express";
 import { CustomError, ErrorResponse, ValidationError } from "../types/types";
+import { ErrorCode, ErrorDictionary } from "../utils/error-dictionary";
 
 export const errorHandler: ErrorRequestHandler = (
   error: Error,
@@ -15,12 +16,12 @@ export const errorHandler: ErrorRequestHandler = (
     err.name === "ValidationError" ||
     err.message?.includes("validation failed")
   ) {
-    customError = {
-      ...error,
-      status: 400,
-      code: "VALIDATION_ERROR",
-      details: err.errors || {},
-    };
+    customError = ErrorDictionary.createError(
+      err.message || "Validation Error",
+      ErrorCode.VALIDATION_ERROR,
+      400,
+      err.errors || {},
+    );
   }
 
   console.error(

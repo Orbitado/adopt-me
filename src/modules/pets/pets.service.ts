@@ -21,6 +21,10 @@ export class PetsService {
   async deletePet(id: string) {
     return await petsDAO.delete(id);
   }
+
+  async getPetByName(name: string) {
+    return await petsDAO.findByName(name);
+  }
 }
 
 export const petsService = new PetsService();

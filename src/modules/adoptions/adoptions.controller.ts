@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import { adoptionsService } from "./adoptions.service";
 import { CustomError } from "../../types/types";
 import { errorHandler } from "../../middlewares/error-handler";
+import { ErrorDictionary } from "../../utils/error-dictionary";
 
 export class AdoptionsController {
   async createAdoption(req: Request, res: Response, next: NextFunction) {
@@ -36,18 +37,12 @@ export class AdoptionsController {
       const { id } = req.params;
 
       if (!id) {
-        const error: CustomError = new Error("Adoption ID is required");
-        error.status = 400;
-        error.code = "INVALID_REQUEST";
-        throw error;
+        throw ErrorDictionary.invalidRequest("Adoption ID is required");
       }
 
       const adoption = await adoptionsService.getAdoptionById(id);
       if (!adoption) {
-        const error: CustomError = new Error("Adoption not found");
-        error.status = 404;
-        error.code = "NOT_FOUND";
-        throw error;
+        throw ErrorDictionary.resourceNotFound("Adoption", id);
       }
 
       res.status(200).json({
@@ -66,10 +61,7 @@ export class AdoptionsController {
       const adoptionData = req.body;
 
       if (!id) {
-        const error: CustomError = new Error("Adoption ID is required");
-        error.status = 400;
-        error.code = "INVALID_REQUEST";
-        throw error;
+        throw ErrorDictionary.invalidRequest("Adoption ID is required");
       }
 
       const updatedAdoption = await adoptionsService.updateAdoption(
@@ -91,11 +83,9 @@ export class AdoptionsController {
       const { id } = req.params;
 
       if (!id) {
-        const error: CustomError = new Error("Adoption ID is required");
-        error.status = 400;
-        error.code = "INVALID_REQUEST";
-        throw error;
+        throw ErrorDictionary.invalidRequest("Adoption ID is required");
       }
+
       const deletedAdoption = await adoptionsService.deleteAdoption(id);
       res.status(200).json({
         success: true,

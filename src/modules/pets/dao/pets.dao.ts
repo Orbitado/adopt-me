@@ -28,6 +28,10 @@ export class PetsDAO {
   async delete(id: string) {
     return await this.model.findByIdAndDelete(id).exec();
   }
+
+  async findByName(name: string) {
+    return await this.model.findOne({ name }).exec();
+  }
 }
 
 export const petsDAO = new PetsDAO(Pet);
