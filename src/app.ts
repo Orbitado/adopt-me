@@ -8,6 +8,7 @@ import { ENV } from "./config/dotenv";
 import { notFoundHandler } from "./middlewares/not-found-handler";
 import { errorHandler } from "./middlewares/error-handler";
 import petsRouter from "./modules/pets/pets.routes";
+import adoptionsRouter from "./modules/adoptions/adoptions.routes";
 
 connectDb();
 
@@ -37,7 +38,7 @@ app.use(compression());
 
 // app.use('/api/users',usersRouter);
 app.use("/api/pets", petsRouter);
-// app.use('/api/adoptions',adoptionsRouter);
+app.use("/api/adoptions", adoptionsRouter);
 // app.use('/api/sessions',sessionsRouter);
 
 app.use(notFoundHandler);
