@@ -19,6 +19,10 @@ export class PetsDAO {
     return await this.model.findById(id).exec();
   }
 
+  async findByName(name: string) {
+    return await this.model.findOne({ name }).exec();
+  }
+
   async update(id: string, petData: UpdatePetDTO) {
     return await this.model
       .findByIdAndUpdate(id, petData, { new: true })
@@ -27,10 +31,6 @@ export class PetsDAO {
 
   async delete(id: string) {
     return await this.model.findByIdAndDelete(id).exec();
-  }
-
-  async findByName(name: string) {
-    return await this.model.findOne({ name }).exec();
   }
 }
 
