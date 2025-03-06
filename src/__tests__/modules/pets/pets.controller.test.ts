@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import { petsController } from "../../../modules/pets/pets.controller";
 import { petsService } from "../../../modules/pets/pets.service";
 import { ErrorDictionary } from "../../../utils/error-dictionary";
-import { CreatePetDTO } from "../../../modules/pets/dto/pet.dto";
+import { CreatePetDTO, UpdatePetDTO } from "../../../modules/pets/dto/pet.dto";
 import { CustomError } from "../../../types/types";
 import { IPet } from "../../../modules/pets/pets.model";
 
@@ -180,8 +180,8 @@ describe("PetsController", () => {
         name: "Buddy",
         breed: "Labrador",
         birthDate: new Date("2020-01-01"),
-        gender: "male",
-        size: "large",
+        gender: "male" as "male" | "female",
+        size: "large" as "small" | "medium" | "large",
         description:
           "Buddy is a friendly and energetic dog who loves to play fetch.",
         isAdopted: false,
@@ -237,6 +237,184 @@ describe("PetsController", () => {
       );
       expect(mockResponse.status).toHaveBeenCalledWith(404);
       expect(mockResponse.json).toHaveBeenCalled();
+    });
+  });
+
+  describe("Get a Pet by Name", () => {
+    it("Should get a pet by name", async () => {
+      const pet: IPet = {
+        name: "Buddy",
+        breed: "Labrador",
+        birthDate: new Date("2020-01-01"),
+        gender: "male" as "male" | "female",
+        size: "large" as "small" | "medium" | "large",
+        description:
+          "Buddy is a friendly and energetic dog who loves to play fetch.",
+        isAdopted: false,
+      };
+
+      const expectedPet = { ...pet, _id: "existing-id" };
+      (petsService.getPetByName as jest.Mock).mockResolvedValue(expectedPet);
+
+      mockRequest.params = { name: pet.name };
+
+      await petsController.getPetByName(
+        mockRequest as Request,
+        mockResponse as Response,
+        mockNext,
+      );
+
+      expect(petsService.getPetByName).toHaveBeenCalledWith(pet.name);
+      expect(mockResponse.status).toHaveBeenCalledWith(200);
+      expect(mockResponse.json).toHaveBeenCalledWith({
+        success: true,
+        message: `Pet ${expectedPet.name} fetched successfully`,
+        payload: expectedPet,
+      });
+    });
+
+    it("Should throw an error when a pet is not found by name", async () => {
+      const nonExistentName = "nonexistent-name";
+      mockRequest.params = { name: nonExistentName };
+
+      (petsService.getPetByName as jest.Mock).mockResolvedValue(null);
+
+      const notFoundError: CustomError = {
+        name: "ResourceNotFoundError",
+        message: "Pet not found",
+        status: 404,
+        code: "RESOURCE_NOT_FOUND",
+      };
+
+      (ErrorDictionary.resourceNotFound as jest.Mock).mockReturnValue(
+        notFoundError,
+      );
+
+      await petsController.getPetByName(
+        mockRequest as Request,
+        mockResponse as Response,
+        mockNext,
+      );
+
+      expect(petsService.getPetByName).toHaveBeenCalledWith(nonExistentName);
+      expect(ErrorDictionary.resourceNotFound).toHaveBeenCalledWith(
+        "Pet",
+        nonExistentName,
+      );
+      expect(mockResponse.status).toHaveBeenCalledWith(404);
+      expect(mockResponse.json).toHaveBeenCalled();
+    });
+  });
+
+  describe("Update a Pet", () => {
+    it("Should update a pet", async () => {
+      const pet: IPet = {
+        name: "Buddy",
+        breed: "Labrador",
+        birthDate: new Date("2020-01-01"),
+        gender: "male" as "male" | "female",
+        size: "large" as "small" | "medium" | "large",
+        description:
+          "Buddy is a friendly and energetic dog who loves to play fetch.",
+        isAdopted: false,
+      };
+
+      const updatedPet: UpdatePetDTO = { name: "Buddy Updated" };
+
+      const petId = "existing-id";
+      const expectedPet = { ...pet, _id: petId, ...updatedPet };
+
+      mockRequest.params = { id: petId };
+      mockRequest.body = updatedPet;
+
+      (petsService.updatePet as jest.Mock).mockResolvedValue(expectedPet);
+
+      await petsController.updatePet(
+        mockRequest as Request,
+        mockResponse as Response,
+        mockNext,
+      );
+
+      expect(petsService.updatePet).toHaveBeenCalledWith(petId, updatedPet);
+      expect(mockResponse.status).toHaveBeenCalledWith(200);
+      expect(mockResponse.json).toHaveBeenCalledWith({
+        success: true,
+        message: `Pet ${expectedPet.name} updated successfully`,
+        payload: expectedPet,
+      });
+    });
+
+    it("Should throw an error when a pet is not found by ID", async () => {
+      const updatedPet = { name: "Buddy Updated" };
+
+      const nonExistentId = "nonexistent-id";
+      mockRequest.params = { id: nonExistentId };
+      mockRequest.body = updatedPet;
+
+      (petsService.updatePet as jest.Mock).mockResolvedValue(null);
+
+      const notFoundError: CustomError = {
+        name: "ResourceNotFoundError",
+        message: "Pet not found",
+        status: 404,
+        code: "RESOURCE_NOT_FOUND",
+      };
+
+      (ErrorDictionary.resourceNotFound as jest.Mock).mockReturnValue(
+        notFoundError,
+      );
+
+      await petsController.updatePet(
+        mockRequest as Request,
+        mockResponse as Response,
+        mockNext,
+      );
+
+      expect(petsService.updatePet).toHaveBeenCalledWith(
+        nonExistentId,
+        updatedPet,
+      );
+      expect(ErrorDictionary.resourceNotFound).toHaveBeenCalledWith(
+        "Pet",
+        nonExistentId,
+      );
+      expect(mockResponse.status).toHaveBeenCalledWith(404);
+      expect(mockResponse.json).toHaveBeenCalled();
+    });
+  });
+
+  describe("Delete a Pet", () => {
+    it("Should delete a pet", async () => {
+      const petId = "existing-id";
+      mockRequest.params = { id: petId };
+
+      const pet: IPet = {
+        name: "Buddy",
+        breed: "Labrador",
+        birthDate: new Date("2020-01-01"),
+        gender: "male" as "male" | "female",
+        size: "large" as "small" | "medium" | "large",
+        description:
+          "Buddy is a friendly and energetic dog who loves to play fetch.",
+        isAdopted: false,
+      };
+
+      const expectedPet = { ...pet, _id: petId };
+      (petsService.deletePet as jest.Mock).mockResolvedValue(expectedPet);
+
+      await petsController.deletePet(
+        mockRequest as Request,
+        mockResponse as Response,
+        mockNext,
+      );
+
+      expect(petsService.deletePet).toHaveBeenCalledWith(petId);
+      expect(mockResponse.status).toHaveBeenCalledWith(200);
+      expect(mockResponse.json).toHaveBeenCalledWith({
+        success: true,
+        message: `Pet ${expectedPet.name} deleted successfully`,
+        payload: expectedPet,
+      });
     });
   });
 });

@@ -95,6 +95,10 @@ export class PetsController {
         throw ErrorDictionary.invalidRequest("Pet ID is required");
       }
 
+      if (!petData) {
+        throw ErrorDictionary.invalidRequest("Pet data is required");
+      }
+
       const pet = await petsService.updatePet(id, petData);
 
       if (!pet) {
