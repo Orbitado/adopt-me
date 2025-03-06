@@ -1,7 +1,7 @@
 {
   "name": "adopt-me",
   "version": "1.0.0",
-  "description": "This project is a RESTful API built with Node.js, Express, and TypeScript to manage a catalog of pets available for adoption.",
+  "description": "Robust Pet Adoption API built with Node.js, Express, and TypeScript implementing domain-driven design principles. Features RESTful endpoints for pet catalog management, adoption process workflows, advanced error handling, data validation via Zod, comprehensive test coverage with Jest, and enterprise-level security including rate limiting and environment-specific configurations. Optimized with compression middleware and follows best practices for code quality using ESLint, Prettier, and Husky pre-commit hooks.",
   "main": "dist/app.js",
   "scripts": {
     "test": "jest",

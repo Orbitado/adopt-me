@@ -62,6 +62,30 @@ export class PetsController {
     }
   }
 
+  async getPetByName(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { name } = req.params;
+
+      if (!name) {
+        throw ErrorDictionary.invalidRequest("Pet name is required");
+      }
+
+      const pet = await petsService.getPetByName(name);
+
+      if (!pet) {
+        throw ErrorDictionary.resourceNotFound("Pet", name);
+      }
+
+      res.status(200).json({
+        success: true,
+        message: `Pet ${pet.name} fetched successfully`,
+        payload: pet,
+      });
+    } catch (error) {
+      errorHandler(error as CustomError, req, res, next);
+    }
+  }
+
   async updatePet(req: Request, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
@@ -69,6 +93,10 @@ export class PetsController {
 
       if (!id) {
         throw ErrorDictionary.invalidRequest("Pet ID is required");
+      }
+
+      if (!petData) {
+        throw ErrorDictionary.invalidRequest("Pet data is required");
       }
 
       const pet = await petsService.updatePet(id, petData);
