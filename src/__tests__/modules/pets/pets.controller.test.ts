@@ -137,8 +137,8 @@ describe("PetsController", () => {
           name: "Buddy",
           breed: "Labrador",
           birthDate: new Date("2020-01-01"),
-          gender: "male",
-          size: "large",
+          gender: "male" as "male" | "female",
+          size: "large" as "small" | "medium" | "large",
           description:
             "Buddy is a friendly and energetic dog who loves to play fetch.",
           isAdopted: false,
@@ -155,7 +155,10 @@ describe("PetsController", () => {
         },
       ];
 
-      const expectedPets = pets.map((pet) => ({ ...pet, _id: "some-id" }));
+      const expectedPets = pets.map((pet, index) => ({
+        ...pet,
+        _id: `pet-id-${index}`,
+      }));
       (petsService.getAllPets as jest.Mock).mockResolvedValue(expectedPets);
 
       await petsController.getAllPets(
@@ -171,6 +174,21 @@ describe("PetsController", () => {
         message: "Pets fetched successfully",
         payload: expectedPets,
       });
+    });
+
+    it("Should handle error when fetching all pets fails", async () => {
+      const error = new Error("Database error");
+      (petsService.getAllPets as jest.Mock).mockRejectedValue(error);
+
+      await petsController.getAllPets(
+        mockRequest as Request,
+        mockResponse as Response,
+        mockNext,
+      );
+
+      expect(petsService.getAllPets).toHaveBeenCalled();
+      expect(mockResponse.status).toHaveBeenCalledWith(500);
+      expect(mockResponse.json).toHaveBeenCalled();
     });
   });
 
@@ -238,6 +256,33 @@ describe("PetsController", () => {
       expect(mockResponse.status).toHaveBeenCalledWith(404);
       expect(mockResponse.json).toHaveBeenCalled();
     });
+
+    it("Should throw an error when ID is not provided", async () => {
+      mockRequest.params = {};
+
+      const invalidRequestError: CustomError = {
+        name: "InvalidRequestError",
+        message: "Pet ID is required",
+        status: 400,
+        code: "INVALID_REQUEST",
+      };
+
+      (ErrorDictionary.invalidRequest as jest.Mock).mockReturnValue(
+        invalidRequestError,
+      );
+
+      await petsController.getPetById(
+        mockRequest as Request,
+        mockResponse as Response,
+        mockNext,
+      );
+
+      expect(ErrorDictionary.invalidRequest).toHaveBeenCalledWith(
+        "Pet ID is required",
+      );
+      expect(mockResponse.status).toHaveBeenCalledWith(400);
+      expect(mockResponse.json).toHaveBeenCalled();
+    });
   });
 
   describe("Get a Pet by Name", () => {
@@ -302,6 +347,33 @@ describe("PetsController", () => {
         nonExistentName,
       );
       expect(mockResponse.status).toHaveBeenCalledWith(404);
+      expect(mockResponse.json).toHaveBeenCalled();
+    });
+
+    it("Should throw an error when pet name is not provided", async () => {
+      mockRequest.params = {}; // No name parameter
+
+      const invalidRequestError: CustomError = {
+        name: "InvalidRequestError",
+        message: "Pet name is required",
+        status: 400,
+        code: "INVALID_REQUEST",
+      };
+
+      (ErrorDictionary.invalidRequest as jest.Mock).mockReturnValue(
+        invalidRequestError,
+      );
+
+      await petsController.getPetByName(
+        mockRequest as Request,
+        mockResponse as Response,
+        mockNext,
+      );
+
+      expect(ErrorDictionary.invalidRequest).toHaveBeenCalledWith(
+        "Pet name is required",
+      );
+      expect(mockResponse.status).toHaveBeenCalledWith(400);
       expect(mockResponse.json).toHaveBeenCalled();
     });
   });
@@ -381,6 +453,62 @@ describe("PetsController", () => {
       expect(mockResponse.status).toHaveBeenCalledWith(404);
       expect(mockResponse.json).toHaveBeenCalled();
     });
+
+    it("Should throw an error when pet ID is not provided", async () => {
+      mockRequest.params = {};
+      mockRequest.body = { name: "Updated Name" };
+
+      const invalidRequestError: CustomError = {
+        name: "InvalidRequestError",
+        message: "Pet ID is required",
+        status: 400,
+        code: "INVALID_REQUEST",
+      };
+
+      (ErrorDictionary.invalidRequest as jest.Mock).mockReturnValue(
+        invalidRequestError,
+      );
+
+      await petsController.updatePet(
+        mockRequest as Request,
+        mockResponse as Response,
+        mockNext,
+      );
+
+      expect(ErrorDictionary.invalidRequest).toHaveBeenCalledWith(
+        "Pet ID is required",
+      );
+      expect(mockResponse.status).toHaveBeenCalledWith(400);
+      expect(mockResponse.json).toHaveBeenCalled();
+    });
+
+    it("Should throw an error when pet data is not provided", async () => {
+      mockRequest.params = { id: "pet-id" };
+      mockRequest.body = undefined;
+
+      const invalidRequestError: CustomError = {
+        name: "InvalidRequestError",
+        message: "Pet data is required",
+        status: 400,
+        code: "INVALID_REQUEST",
+      };
+
+      (ErrorDictionary.invalidRequest as jest.Mock).mockReturnValue(
+        invalidRequestError,
+      );
+
+      await petsController.updatePet(
+        mockRequest as Request,
+        mockResponse as Response,
+        mockNext,
+      );
+
+      expect(ErrorDictionary.invalidRequest).toHaveBeenCalledWith(
+        "Pet data is required",
+      );
+      expect(mockResponse.status).toHaveBeenCalledWith(400);
+      expect(mockResponse.json).toHaveBeenCalled();
+    });
   });
 
   describe("Delete a Pet", () => {
@@ -415,6 +543,67 @@ describe("PetsController", () => {
         message: `Pet ${expectedPet.name} deleted successfully`,
         payload: expectedPet,
       });
+    });
+
+    it("Should throw an error when ID is not provided for deletion", async () => {
+      mockRequest.params = {};
+
+      const invalidRequestError: CustomError = {
+        name: "InvalidRequestError",
+        message: "Pet ID is required",
+        status: 400,
+        code: "INVALID_REQUEST",
+      };
+
+      (ErrorDictionary.invalidRequest as jest.Mock).mockReturnValue(
+        invalidRequestError,
+      );
+
+      await petsController.deletePet(
+        mockRequest as Request,
+        mockResponse as Response,
+        mockNext,
+      );
+
+      expect(ErrorDictionary.invalidRequest).toHaveBeenCalledWith(
+        "Pet ID is required",
+      );
+      expect(mockResponse.status).toHaveBeenCalledWith(400);
+      expect(mockResponse.json).toHaveBeenCalled();
+    });
+
+    it("Should throw an error when a pet is not found for deletion", async () => {
+      const petId = "nonexistent-id";
+      mockRequest.params = { id: petId };
+
+      // Mock petsService.deletePet to return null, indicating the pet was not found
+      (petsService.deletePet as jest.Mock).mockResolvedValue(null);
+
+      const notFoundError: CustomError = {
+        name: "ResourceNotFoundError",
+        message: `Pet not found with id: ${petId}`,
+        status: 404,
+        code: "RESOURCE_NOT_FOUND",
+      };
+
+      (ErrorDictionary.resourceNotFound as jest.Mock).mockReturnValue(
+        notFoundError,
+      );
+
+      await petsController.deletePet(
+        mockRequest as Request,
+        mockResponse as Response,
+        mockNext,
+      );
+
+      expect(petsService.deletePet).toHaveBeenCalledWith(petId);
+      expect(ErrorDictionary.resourceNotFound).toHaveBeenCalledWith(
+        "Pet",
+        petId,
+        { message: `Pet not found with id: ${petId}` },
+      );
+      expect(mockResponse.status).toHaveBeenCalledWith(404);
+      expect(mockResponse.json).toHaveBeenCalled();
     });
   });
 });
