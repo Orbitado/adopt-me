@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - PORT=8080
+      - NODE_ENV=production
+      - MONGO_LINK=mongodb://mongodb:27017/adopt-me-prod
+    volumes:
+      - ./.env.production:/app/.env
+    depends_on:
+      - mongodb
+    restart: unless-stopped
+
+  mongodb:
+    image: mongo:latest
+    command: mongod --quiet --logpath /dev/null
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    restart: unless-stopped
+
+volumes:
+  mongodb_data: 
