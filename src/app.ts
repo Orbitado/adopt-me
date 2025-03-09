@@ -10,6 +10,7 @@ import { errorHandler } from "./middlewares/error-handler";
 import { addLogger } from "./utils/logger";
 import petsRouter from "./modules/pets/pets.routes";
 import adoptionsRouter from "./modules/adoptions/adoptions.routes";
+import usersRouter from "./modules/users/users.routes";
 
 connectDb();
 
@@ -52,6 +53,7 @@ app.get("/api/health", (_req: Request, res: Response) => {
 
 app.use("/api/pets", petsRouter);
 app.use("/api/adoptions", adoptionsRouter);
+app.use("/api/users", usersRouter);
 
 app.use(addLogger);
 app.use(notFoundHandler);

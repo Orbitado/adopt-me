@@ -5,8 +5,8 @@ import { errorHandler } from "../../middlewares/error-handler";
 import { ErrorDictionary } from "../../utils/error-dictionary";
 import { petsService } from "../pets/pets.service";
 import { IPet } from "../pets/pets.model";
-// import { usersService } from "../users/users.service";
-
+import { IUser } from "../users/users.model";
+import { usersService } from "../users/users.service";
 export class AdoptionsController {
   async createAdoption(req: Request, res: Response, next: NextFunction) {
     try {
@@ -16,11 +16,10 @@ export class AdoptionsController {
         throw ErrorDictionary.invalidRequest("Pet ID and User ID are required");
       }
 
-      // TODO: Implement users service and uncomment this validation
-      // const user = await usersService.getUserById(userId);
-      // if (!user) {
-      //   throw ErrorDictionary.resourceNotFound("User", userId);
-      // }
+      const user = await usersService.getUserById(userId);
+      if (!user) {
+        throw ErrorDictionary.resourceNotFound("User", userId);
+      }
 
       const pet: IPet | null = await petsService.getPetById(petId);
       if (!pet) {
@@ -35,14 +34,21 @@ export class AdoptionsController {
         const adoptionData = req.body;
         const adoption = await adoptionsService.createAdoption(adoptionData);
 
-        const updatedPet = await petsService.updatePet(petId, {
+        const updatedPet: IPet | null = await petsService.updatePet(petId, {
           isAdopted: true,
         });
+
+        const updatedUser: IUser | null = await usersService.updateUser(
+          userId,
+          {
+            pets: [...user.pets, petId],
+          },
+        );
 
         res.status(201).json({
           success: true,
           message: `Adoption ${adoption.id} created successfully`,
-          payload: { adoption, pet: updatedPet },
+          payload: { adoption, pet: updatedPet, user: updatedUser },
         });
       } catch (error) {
         throw ErrorDictionary.internalServerError(
