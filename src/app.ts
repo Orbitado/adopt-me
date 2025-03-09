@@ -7,6 +7,7 @@ import { connectDb } from "./config/database";
 import { ENV } from "./config/dotenv";
 import { notFoundHandler } from "./middlewares/not-found-handler";
 import { errorHandler } from "./middlewares/error-handler";
+import { addLogger } from "./utils/logger";
 import petsRouter from "./modules/pets/pets.routes";
 import adoptionsRouter from "./modules/adoptions/adoptions.routes";
 
@@ -45,6 +46,7 @@ app.use("/api/pets", petsRouter);
 app.use("/api/adoptions", adoptionsRouter);
 // app.use('/api/sessions',sessionsRouter);
 
+app.use(addLogger);
 app.use(notFoundHandler);
 
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
