@@ -13,38 +13,45 @@ import adoptionsRouter from "./modules/adoptions/adoptions.routes";
 
 connectDb();
 
-// import usersRouter from './routes/users.router.js';
-// import petsRouter from './routes/pets.router.js';
-// import adoptionsRouter from './routes/adoption.router.js';
-// import sessionsRouter from './routes/sessions.router.js';
-
 const app = express();
 
 const { PORT, NODE_ENV } = ENV;
 
-app.use(cors());
+app.use(
+  cors({
+    origin: "*",
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true,
+    maxAge: 86400,
+  }),
+);
 
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 100,
+  windowMs: 1 * 60 * 1000,
+  max: 2000,
   standardHeaders: true,
   legacyHeaders: false,
+  message: "Too many requests, please try again later.",
 });
 app.use(limiter);
 
-app.use(express.json({ limit: "10kb" }));
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: "50kb" }));
+app.use(express.urlencoded({ extended: true, limit: "50kb" }));
 app.use(cookieParser());
 app.use(compression());
 
 app.get("/api/health", (_req: Request, res: Response) => {
-  res.status(200).json({ status: "ok" });
+  res.status(200).json({
+    status: "ok",
+    timestamp: new Date().toISOString(),
+    environment: NODE_ENV,
+    uptime: process.uptime(),
+  });
 });
 
-// app.use('/api/users',usersRouter);
 app.use("/api/pets", petsRouter);
 app.use("/api/adoptions", adoptionsRouter);
-// app.use('/api/sessions',sessionsRouter);
 
 app.use(addLogger);
 app.use(notFoundHandler);
