@@ -17,5 +17,5 @@ export type CreateAdoptionDTO = z.infer<typeof createAdoptionSchema>;
 export type UpdateAdoptionDTO = z.infer<typeof updateAdoptionSchema>;
 
 export interface AdoptionResponseDTO extends CreateAdoptionDTO {
-  id: string;
+  _id: string;
 }

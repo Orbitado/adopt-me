@@ -1,0 +1,213 @@
+# NOTA: Ejecuta primero esta versión simplificada para verificar que todo funciona correctamente.
+# Una vez que esta versión funcione, puedes habilitar la sección "VERSIÓN COMPLETA" comentando
+# la sección "VERSIÓN SIMPLIFICADA" y descomentando la sección "VERSIÓN COMPLETA".
+
+# ==================== VERSIÓN SIMPLIFICADA ====================
+# config:
+#   target: "http://localhost:3000"
+#   phases:
+#     - duration: 10
+#       arrivalRate: 1
+#       name: "Prueba simplificada"
+#   http:
+#     timeout: 10000
+#     pool: 10
+#   # Modo de depuración
+#   verbose: true
+
+# scenarios:
+#   - name: "simple-health-check"
+#     flow:
+#       - get:
+#           url: "/api/health"
+#           expect:
+#             - statusCode: 200
+
+#   - name: "simple-pets-flow"
+#     flow:
+#       # 1. Verificación del endpoint de salud
+#       - get:
+#           url: "/api/health"
+      
+#       # 2. Crear una mascota
+#       - post:
+#           url: "/api/pets"
+#           json:
+#             name: "TestPet-{{ $randomString(5) }}"
+#             birthDate: "2021-05-10T00:00:00.000Z"
+#             breed: "TestBreed"
+#             gender: "male"
+#             size: "medium"
+#             description: "Este es un perro de prueba para Artillery."
+#           capture:
+#             - as: "response_body"
+#               json: "$"
+#               strict: false
+#             - as: "pet_id"
+#               json: "$.payload._id"
+#               strict: false
+#           expect:
+#             - statusCode: 201
+
+#       # 3. Imprimir respuesta para depuración
+#       - log: "Respuesta completa de creación: {{ response_body }}"
+#       - log: "ID capturado: {{ pet_id }}"
+      
+#       # 4. Consultar la mascota creada (sólo si se capturó el ID)
+#       - get:
+#           url: "/api/pets/{{ pet_id }}"
+#           expect:
+#             - statusCode: 200
+      
+#   - name: "simple-adoptions-flow"
+#     flow:
+#       # 1. Verificación del endpoint de salud
+#       - get:
+#           url: "/api/health"
+      
+#       # 2. Listar adopciones (operación simple)
+#       - get:
+#           url: "/api/adoptions"
+#           expect:
+#             - statusCode: 200
+
+# ==================== VERSIÓN COMPLETA ====================
+# Descomenta esta sección cuando la versión simplificada funcione correctamente
+#
+config:
+  target: "http://localhost:3000"
+  phases:
+    # Fase de calentamiento - Cargar gradualmente
+    - duration: 20
+      arrivalRate: 2
+      name: "Fase de calentamiento"
+    # Fase de carga moderada
+    - duration: 30
+      arrivalRate: 5
+      name: "Carga moderada"
+    # Fase de carga constante
+    - duration: 30
+      arrivalRate: 10
+      name: "Carga constante"
+    # Fase de enfriamiento - Reducir gradualmente
+    - duration: 20
+      arrivalRate: 2
+      name: "Fase de enfriamiento"
+  http:
+    timeout: 10000
+    pool: 10
+  verbose: false
+
+scenarios:
+  - name: "pets-workflow"
+    weight: 60
+    flow:
+      # 1. Verificar salud del sistema
+      - get:
+          url: "/api/health"
+          expect:
+            - statusCode: 200
+      
+      # 2. Crear una mascota
+      - post:
+          url: "/api/pets"
+          json:
+            name: "Luna-{{ $randomString(8) }}"
+            birthDate: "2022-03-15T00:00:00.000Z"
+            breed: "Dobberman"
+            gender: "female"
+            size: "small"
+            description: "Luna es una hermosa perrita muy amigable y energética. Le encanta jugar y es excelente con niños."
+          capture:
+            - as: "pet_id"
+              json: "$.payload._id"
+              strict: false
+          expect:
+            - statusCode: 201
+      
+      # 3. Listar todas las mascotas
+      - get:
+          url: "/api/pets"
+          expect:
+            - statusCode: 200
+      
+      # 4. Obtener la mascota creada por ID
+      - get:
+          url: "/api/pets/{{ pet_id }}"
+          expect:
+            - statusCode: 200
+      
+      # 5. Actualizar la mascota
+      - put:
+          url: "/api/pets/{{ pet_id }}"
+          json:
+            name: "Luna-Updated-{{ $randomString(8) }}"
+            gender: "female"
+            size: "medium"
+          expect:
+            - statusCode: 200
+
+  - name: "adoptions-workflow"
+    weight: 40
+    flow:
+      # 1. Verificar salud del sistema
+      - get:
+          url: "/api/health"
+          expect:
+            - statusCode: 200
+      
+      # 2. Crear una mascota primero para la adopción
+      - post:
+          url: "/api/pets"
+          json:
+            name: "Max-{{ $randomString(8) }}"
+            birthDate: "2021-05-10T00:00:00.000Z"
+            breed: "Labrador"
+            gender: "male"
+            size: "medium"
+            description: "Max es un perro juguetón y muy sociable. Se lleva bien con otros animales y niños."
+          capture:
+            - as: "pet_id"
+              json: "$.payload._id"
+              strict: false
+          expect:
+            - statusCode: 201
+      
+      # 3. Listar adopciones
+      - get:
+          url: "/api/adoptions"
+          expect:
+            - statusCode: 200
+      
+      # 4. Crear una adopción
+      - post:
+          url: "/api/adoptions"
+          json:
+            petId: "{{ pet_id }}"
+            adopterId: "adopter-{{ $randomString(8) }}"
+            status: "pending"
+            applicationDate: "2023-08-10T00:00:00.000Z"
+            notes: "Solicitante con experiencia previa con mascotas."
+            homeVisitDate: "2023-08-20T00:00:00.000Z"
+          capture:
+            - as: "adoption_id"
+              json: "$.payload._id"
+              strict: false
+          expect:
+            - statusCode: 201
+      
+      # 5. Obtener la adopción por ID
+      - get:
+          url: "/api/adoptions/{{ adoption_id }}"
+          expect:
+            - statusCode: 200
+      
+      # 6. Actualizar la adopción
+      - put:
+          url: "/api/adoptions/{{ adoption_id }}"
+          json:
+            status: "approved"
+            approvalDate: "2023-08-25T00:00:00.000Z"
+            notes: "Visita completada con éxito."
+          expect:
+            - statusCode: 200 

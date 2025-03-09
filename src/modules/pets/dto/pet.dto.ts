@@ -28,5 +28,5 @@ export const updatePetSchema = createPetSchema.partial();
 export type CreatePetDTO = z.infer<typeof createPetSchema>;
 export type UpdatePetDTO = z.infer<typeof updatePetSchema>;
 export interface PetResponseDTO extends CreatePetDTO {
-  id: string;
+  _id: string;
 }
