@@ -2,21 +2,29 @@ import express, { NextFunction, Request, Response } from "express";
 import cookieParser from "cookie-parser";
 import compression from "compression";
 import cors from "cors";
+import session from "express-session";
 import rateLimit from "express-rate-limit";
+
+// Config
 import { connectDb } from "./config/database";
 import { ENV } from "./config/dotenv";
+
+// Middlewares
 import { notFoundHandler } from "./middlewares/not-found-handler";
 import { errorHandler } from "./middlewares/error-handler";
 import { addLogger } from "./utils/logger";
+
+// Routes
 import petsRouter from "./modules/pets/pets.routes";
 import adoptionsRouter from "./modules/adoptions/adoptions.routes";
 import usersRouter from "./modules/users/users.routes";
+// import sessionsRouter from "./modules/sessions/sessions.routes";
 
 connectDb();
 
 const app = express();
 
-const { PORT, NODE_ENV } = ENV;
+const { PORT, NODE_ENV, SESSION_SECRET_KEY, SESSION_EXPIRATION_TIME } = ENV;
 
 app.use(
   cors({
@@ -37,6 +45,19 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
+app.use(
+  session({
+    secret: SESSION_SECRET_KEY,
+    resave: false,
+    saveUninitialized: true,
+    cookie: {
+      maxAge: SESSION_EXPIRATION_TIME,
+      httpOnly: true,
+      secure: NODE_ENV === "production",
+    },
+  }),
+);
+
 app.use(express.json({ limit: "50kb" }));
 app.use(express.urlencoded({ extended: true, limit: "50kb" }));
 app.use(cookieParser());
@@ -54,6 +75,7 @@ app.get("/api/health", (_req: Request, res: Response) => {
 app.use("/api/pets", petsRouter);
 app.use("/api/adoptions", adoptionsRouter);
 app.use("/api/users", usersRouter);
+// app.use("/api/sessions", sessionsRouter);
 
 app.use(addLogger);
 app.use(notFoundHandler);
