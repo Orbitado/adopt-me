@@ -5,6 +5,10 @@ import { errorHandler } from "../../middlewares/error-handler";
 import { ErrorDictionary } from "../../utils/error-dictionary";
 
 export class AdoptionsController {
+  /**
+   * Create a new adoption
+   * POST /api/adoptions
+   */
   async createAdoption(req: Request, res: Response, next: NextFunction) {
     try {
       const adoptionData = req.body;
@@ -20,9 +24,14 @@ export class AdoptionsController {
     }
   }
 
+  /**
+   * Get all adoptions
+   * GET /api/adoptions
+   */
   async getAllAdoptions(req: Request, res: Response, next: NextFunction) {
     try {
       const adoptions = await adoptionsService.getAllAdoptions();
+
       res.status(200).json({
         success: true,
         message: "Adoptions fetched successfully",
@@ -33,10 +42,15 @@ export class AdoptionsController {
     }
   }
 
+  /**
+   * Get an adoption by its ID
+   * GET /api/adoptions/:id
+   */
   async getAdoptionById(req: Request, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
 
+      // TODO: Move this to a middleware
       if (!id) {
         throw ErrorDictionary.invalidRequest("Adoption ID is required");
       }
@@ -56,11 +70,16 @@ export class AdoptionsController {
     }
   }
 
+  /**
+   * Update an adoption
+   * PUT /api/adoptions/:id
+   */
   async updateAdoption(req: Request, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
       const adoptionData = req.body;
 
+      // TODO: Move this to a middleware
       if (!id) {
         throw ErrorDictionary.invalidRequest("Adoption ID is required");
       }
@@ -70,6 +89,7 @@ export class AdoptionsController {
         adoptionData,
       );
 
+      // TODO: Move this to a middleware
       if (!updatedAdoption) {
         throw ErrorDictionary.resourceNotFound("Adoption", id);
       }
@@ -84,16 +104,22 @@ export class AdoptionsController {
     }
   }
 
+  /**
+   * Delete an adoption
+   * DELETE /api/adoptions/:id
+   */
   async deleteAdoption(req: Request, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
 
+      // TODO: Move this to a middleware
       if (!id) {
         throw ErrorDictionary.invalidRequest("Adoption ID is required");
       }
 
       const deletedAdoption = await adoptionsService.deleteAdoption(id);
 
+      // TODO: Move this to a middleware
       if (!deletedAdoption) {
         throw ErrorDictionary.resourceNotFound("Adoption", id);
       }

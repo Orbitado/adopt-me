@@ -7,6 +7,11 @@ import { MongoServerError, CastError } from "../../../types/types";
 export class AdoptionsDAO {
   constructor(private readonly model: Model<IAdoption>) {}
 
+  /**
+   * Create a new adoption in the database
+   * @param adoptionData Data of the adoption to create
+   * @returns The created adoption
+   */
   async create(adoptionData: CreateAdoptionDTO) {
     try {
       const adoption = new this.model(adoptionData);
@@ -25,10 +30,19 @@ export class AdoptionsDAO {
     }
   }
 
+  /**
+   * Get all adoptions
+   * @returns List of adoptions
+   */
   async findAll() {
     return await this.model.find().exec();
   }
 
+  /**
+   * Get an adoption by its ID
+   * @param id ID of the adoption
+   * @returns The found adoption or null if it doesn't exist
+   */
   async findById(id: string) {
     try {
       return await this.model.findById(id).exec();
@@ -38,16 +52,27 @@ export class AdoptionsDAO {
         error.name === "CastError" &&
         (error as CastError).kind === "ObjectId"
       ) {
-        return null;
+        return null; // Devolver null cuando el formato del ID es inválido
       }
       throw error;
     }
   }
 
+  /**
+   * Get adoptions by user ID
+   * @param userId ID of the user
+   * @returns List of adoptions of the user
+   */
   async findByUserId(userId: string) {
     return await this.model.find({ userId }).exec();
   }
 
+  /**
+   * Actualiza una adopción
+   * @param id ID of the adoption to update
+   * @param adoptionData Data to update
+   * @returns The updated adoption or null if it doesn't exist
+   */
   async update(id: string, adoptionData: UpdateAdoptionDTO) {
     try {
       return await this.model
@@ -65,6 +90,11 @@ export class AdoptionsDAO {
     }
   }
 
+  /**
+   * Delete an adoption
+   * @param id ID of the adoption to delete
+   * @returns The deleted adoption or null if it doesn't exist
+   */
   async delete(id: string) {
     try {
       return await this.model.findByIdAndDelete(id).exec();
