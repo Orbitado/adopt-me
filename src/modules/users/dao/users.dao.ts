@@ -2,15 +2,7 @@ import { Model } from "mongoose";
 import User from "../users.model";
 import { CreateUserDTO, UpdateUserDTO } from "../dto/user.dto";
 import { IUser } from "../users.model";
-
-interface MongoServerError extends Error {
-  code?: number;
-  keyValue?: Record<string, unknown>;
-}
-
-interface CastError extends Error {
-  kind?: string;
-}
+import { MongoServerError, CastError } from "../../../types/types";
 
 export class UsersDAO {
   constructor(private readonly model: Model<IUser>) {}

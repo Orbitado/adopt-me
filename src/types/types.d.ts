@@ -20,3 +20,12 @@ export interface ValidationError extends Error {
   message: string;
   errors?: Record<string, unknown>;
 }
+
+export interface MongoServerError extends Error {
+  code?: number;
+  keyValue?: Record<string, unknown>;
+}
+
+export interface CastError extends Error {
+  kind?: string;
+}
