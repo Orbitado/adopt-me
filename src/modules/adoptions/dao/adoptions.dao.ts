@@ -52,7 +52,7 @@ export class AdoptionsDAO {
         error.name === "CastError" &&
         (error as CastError).kind === "ObjectId"
       ) {
-        return null; // Devolver null cuando el formato del ID es inválido
+        return null;
       }
       throw error;
     }

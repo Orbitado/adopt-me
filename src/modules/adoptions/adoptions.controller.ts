@@ -50,7 +50,6 @@ export class AdoptionsController {
     try {
       const { id } = req.params;
 
-      // TODO: Move this to a middleware
       if (!id) {
         throw ErrorDictionary.invalidRequest("Adoption ID is required");
       }
@@ -79,7 +78,6 @@ export class AdoptionsController {
       const { id } = req.params;
       const adoptionData = req.body;
 
-      // TODO: Move this to a middleware
       if (!id) {
         throw ErrorDictionary.invalidRequest("Adoption ID is required");
       }
@@ -89,7 +87,6 @@ export class AdoptionsController {
         adoptionData,
       );
 
-      // TODO: Move this to a middleware
       if (!updatedAdoption) {
         throw ErrorDictionary.resourceNotFound("Adoption", id);
       }
@@ -112,14 +109,12 @@ export class AdoptionsController {
     try {
       const { id } = req.params;
 
-      // TODO: Move this to a middleware
       if (!id) {
         throw ErrorDictionary.invalidRequest("Adoption ID is required");
       }
 
       const deletedAdoption = await adoptionsService.deleteAdoption(id);
 
-      // TODO: Move this to a middleware
       if (!deletedAdoption) {
         throw ErrorDictionary.resourceNotFound("Adoption", id);
       }
