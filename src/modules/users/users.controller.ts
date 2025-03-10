@@ -16,7 +16,7 @@ export class UsersController {
         const user = await usersService.createUser(userData);
         res.status(201).json({
           success: true,
-          message: `User ${user.first_name} ${user.last_name} created successfully`,
+          message: `User ${user.email} created successfully`,
           payload: user,
         });
       }
@@ -102,7 +102,7 @@ export class UsersController {
 
       res.status(200).json({
         success: true,
-        message: `User ${user.first_name} ${user.last_name} updated successfully`,
+        message: `User ${user.email} updated successfully`,
         payload: user,
       });
     } catch (error) {
@@ -129,7 +129,7 @@ export class UsersController {
 
       res.status(200).json({
         success: true,
-        message: `User ${user.first_name} ${user.last_name} deleted successfully`,
+        message: `User ${user.email} deleted successfully`,
         payload: user,
       });
     } catch (error) {
