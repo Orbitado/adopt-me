@@ -3,12 +3,34 @@ import User from "../users.model";
 import { CreateUserDTO, UpdateUserDTO } from "../dto/user.dto";
 import { IUser } from "../users.model";
 
+interface MongoServerError extends Error {
+  code?: number;
+  keyValue?: Record<string, unknown>;
+}
+
+interface CastError extends Error {
+  kind?: string;
+}
+
 export class UsersDAO {
   constructor(private readonly model: Model<IUser>) {}
 
   async create(userData: CreateUserDTO) {
-    const user = new this.model(userData);
-    return await user.save();
+    try {
+      const user = new this.model(userData);
+      return await user.save();
+    } catch (error) {
+      if (
+        error instanceof Error &&
+        (error as MongoServerError).code === 11000
+      ) {
+        const mongoError = error as MongoServerError;
+        throw new Error(
+          `Duplicate key error: ${JSON.stringify(mongoError.keyValue)}`,
+        );
+      }
+      throw error;
+    }
   }
 
   async findAll() {
@@ -20,7 +42,18 @@ export class UsersDAO {
   }
 
   async findById(id: string) {
-    return await this.model.findById(id).populate("pets").lean().exec();
+    try {
+      return await this.model.findById(id).populate("pets").lean().exec();
+    } catch (error) {
+      if (
+        error instanceof Error &&
+        error.name === "CastError" &&
+        (error as CastError).kind === "ObjectId"
+      ) {
+        return null;
+      }
+      throw error;
+    }
   }
 
   async findByEmail(email: string) {
@@ -28,15 +61,37 @@ export class UsersDAO {
   }
 
   async update(id: string, userData: UpdateUserDTO) {
-    return await this.model
-      .findByIdAndUpdate(id, userData, { new: true })
-      .populate("pets")
-      .lean()
-      .exec();
+    try {
+      return await this.model
+        .findByIdAndUpdate(id, userData, { new: true })
+        .populate("pets")
+        .lean()
+        .exec();
+    } catch (error) {
+      if (
+        error instanceof Error &&
+        error.name === "CastError" &&
+        (error as CastError).kind === "ObjectId"
+      ) {
+        return null;
+      }
+      throw error;
+    }
   }
 
   async delete(id: string) {
-    return await this.model.findByIdAndDelete(id).lean().exec();
+    try {
+      return await this.model.findByIdAndDelete(id).lean().exec();
+    } catch (error) {
+      if (
+        error instanceof Error &&
+        error.name === "CastError" &&
+        (error as CastError).kind === "ObjectId"
+      ) {
+        return null;
+      }
+      throw error;
+    }
   }
 }
 

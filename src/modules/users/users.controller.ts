@@ -3,23 +3,19 @@ import { usersService } from "./users.service";
 import { CustomError } from "../../types/types";
 import { errorHandler } from "../../middlewares/error-handler";
 import { ErrorDictionary } from "../../utils/error-dictionary";
+import { CreateUserDTO } from "./dto/user.dto";
 
 export class UsersController {
   async createUser(req: Request, res: Response, next: NextFunction) {
     try {
-      const existingUser = await usersService.getUserByEmail(req.body.email);
+      const userData: CreateUserDTO = req.body;
+      const user = await usersService.createUser(userData);
 
-      if (existingUser) {
-        throw ErrorDictionary.resourceExists("User");
-      } else {
-        const userData = req.body;
-        const user = await usersService.createUser(userData);
-        res.status(201).json({
-          success: true,
-          message: `User ${user.email} created successfully`,
-          payload: user,
-        });
-      }
+      res.status(201).json({
+        success: true,
+        message: `User ${user.email} created successfully`,
+        payload: user,
+      });
     } catch (error) {
       errorHandler(error as CustomError, req, res, next);
     }
@@ -28,6 +24,7 @@ export class UsersController {
   async getAllUsers(req: Request, res: Response, next: NextFunction) {
     try {
       const users = await usersService.getAllUsers();
+
       res.status(200).json({
         success: true,
         message: "Users fetched successfully",
@@ -47,6 +44,11 @@ export class UsersController {
       }
 
       const user = await usersService.getUserById(id);
+
+      if (!user) {
+        throw ErrorDictionary.resourceNotFound("User", id);
+      }
+
       res.status(200).json({
         success: true,
         message: "User fetched successfully",
@@ -90,10 +92,6 @@ export class UsersController {
         throw ErrorDictionary.invalidRequest("User ID is required");
       }
 
-      if (!userData) {
-        throw ErrorDictionary.invalidRequest("User data is required");
-      }
-
       const user = await usersService.updateUser(id, userData);
 
       if (!user) {
@@ -121,10 +119,7 @@ export class UsersController {
       const user = await usersService.deleteUser(id);
 
       if (!user) {
-        const details = {
-          message: `User not found with id: ${id}`,
-        };
-        throw ErrorDictionary.resourceNotFound("User", id, details);
+        throw ErrorDictionary.resourceNotFound("User", id);
       }
 
       res.status(200).json({
