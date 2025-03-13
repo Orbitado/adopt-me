@@ -4,61 +4,73 @@ This project uses Jest as a testing framework to implement unit, integration, an
 
 ## Test Setup
 
-Tests are configured using:
+The testing environment is configured using:
 
-- **Jest**: Testing framework
-- **ts-jest**: For TypeScript support
-- **supertest**: For API tests
+- **Jest**: Main testing framework
+- **ts-jest**: TypeScript support for Jest
+- **supertest**: HTTP assertions for API testing
+- **@faker-js/faker**: For generating test data
+
+## Test Configuration
+
+Tests are configured in the `jest.config.ts` file, which includes:
+
+- TypeScript configuration
+- Test environment settings
+- Coverage reporting
+- Test path patterns
 
 ## Test Structure
 
 ```
 src/
-  __tests__/               # Main test directory
-    modules/               # Tests by module
-      pets/                # Tests for the pets module
+  __tests__/                # Main test directory
+    modules/                # Test organized by module
+      pets/                 # Tests for the pets module
+        pets.service.test.ts
+        pets.controller.test.ts
         ...
-      adoptions/           # Tests for the adoptions module
-        ...
-    integration/           # Integration tests
-      ...
-    app.test.ts            # Basic application tests
 ```
 
 ## Types of Tests
 
 ### Unit Tests
 
-Verify the isolated functioning of individual components using mocks for their dependencies.
+Unit tests verify the isolated functionality of individual components. Dependencies are typically mocked.
 
 ```typescript
 // Example of a unit test for pets.service.ts
-test('getAllPets should return all pets', async () => {
-  const mockPets = [{ name: 'Fluffy' }, { name: 'Luna' }];
-  petsDAO.findAll.mockResolvedValue(mockPets);
-  
-  const result = await petsService.getAllPets();
-  
-  expect(petsDAO.findAll).toHaveBeenCalled();
-  expect(result).toEqual(mockPets);
+describe('PetsService', () => {
+  test('getAllPets should return all pets', async () => {
+    const mockPets = [{ name: 'Fluffy' }, { name: 'Luna' }];
+    jest.spyOn(petsDAO, 'findAll').mockResolvedValue(mockPets);
+    
+    const result = await petsService.getAllPets();
+    
+    expect(petsDAO.findAll).toHaveBeenCalled();
+    expect(result).toEqual(mockPets);
+  });
 });
 ```
 
 ### Integration Tests
 
-Verify that components work correctly together, for example, the API with the database.
+Integration tests verify that components work correctly together. For example, testing API endpoints with a test database.
 
 ```typescript
 // Example of an integration test for the pets API
-test('GET /api/pets should return all pets', async () => {
-  await Pet.create({ name: 'Fluffy', /* other fields */ });
-  
-  const response = await request(app)
-    .get('/api/pets')
-    .expect(200);
+describe('Pets API', () => {
+  test('GET /api/pets should return all pets', async () => {
+    // Setup test data
+    await Pet.create({ name: 'Fluffy', /* other required fields */ });
     
-  expect(response.body.payload).toHaveLength(1);
-  expect(response.body.payload[0].name).toBe('Fluffy');
+    const response = await request(app)
+      .get('/api/pets')
+      .expect(200);
+      
+    expect(response.body.payload).toHaveLength(1);
+    expect(response.body.payload[0].name).toBe('Fluffy');
+  });
 });
 ```
 
@@ -79,7 +91,7 @@ npm test -- --watch
 ### Run a specific test file
 
 ```bash
-npm test -- modules/pets/pets.service.test.ts
+npm test -- src/__tests__/modules/pets/pets.service.test.ts
 ```
 
 ### Generate coverage report
@@ -90,32 +102,49 @@ npm test -- --coverage
 
 The coverage report will be generated in the `coverage/` directory.
 
-## Database for Tests
+## Test Database
 
-Integration tests use a separate MongoDB database:
+For integration tests involving database operations, the project uses:
 
-- Database name: `adopt-me-test`
-- Host: `localhost`
-- Port: `27017`
+- A separate test database (configured in `.env.test`)
+- Automatic database cleanup between test runs
+- Mongoose test connection management
 
-Tests automatically clean up data before and after execution.
+## Mock Data
 
-## Principles for Writing Good Tests
+The project uses `@faker-js/faker` to generate realistic test data:
 
-1. **Independence**: Each test should be independent of others.
-2. **Determinism**: Tests should produce the same results in each execution.
-3. **Specificity**: Each test should test a single functionality.
-4. **Clarity**: The name and structure of the test should clearly indicate what is being tested.
+```typescript
+import { faker } from '@faker-js/faker';
+
+const mockPet = {
+  name: faker.animal.dog(),
+  birthDate: faker.date.past(),
+  breed: faker.animal.dog(),
+  gender: faker.helpers.arrayElement(['male', 'female']),
+  size: faker.helpers.arrayElement(['small', 'medium', 'large']),
+  description: faker.lorem.paragraph(),
+  isAdopted: false
+};
+```
+
+## Testing Best Practices
+
+1. **Test Isolation**: Each test should be independent of others
+2. **Clear Assertions**: Tests should have clear assertions about expected outcomes
+3. **Realistic Data**: Use faker to create realistic test data
+4. **Clean Setup/Teardown**: Properly setup and cleanup test resources
+5. **Naming Convention**: Use descriptive test names that explain the expected behavior
 
 ## Naming Convention
 
-We follow the pattern:
+We follow this pattern for test organization:
 
-```
-describe('Component', () => {
-  describe('method/functionality', () => {
-    it('should behave in a certain way when...', () => {
-      // Test
+```typescript
+describe('Component or Module', () => {
+  describe('specific method or functionality', () => {
+    it('should behave in a specific way when certain conditions are met', () => {
+      // Test implementation
     });
   });
 });
