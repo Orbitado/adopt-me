@@ -1,144 +1,96 @@
 import { Request, Response, NextFunction } from "express";
 import { petsService } from "./pets.service";
-import { CustomError } from "../../types/types";
-import { errorHandler } from "../../middlewares/error-handler";
-import { ErrorDictionary } from "../../utils/error-dictionary";
 
 export class PetsController {
   async createPet(req: Request, res: Response, next: NextFunction) {
     try {
-      const existingPet = await petsService.getPetByName(req.body.name);
+      const petData = req.body;
+      const pet = await petsService.createPet(petData);
 
-      if (existingPet) {
-        throw ErrorDictionary.resourceExists("Pet");
-      } else {
-        const petData = req.body;
-        const pet = await petsService.createPet(petData);
-        res.status(201).json({
-          success: true,
-          message: `Pet ${pet.name} created successfully`,
-          payload: pet,
-        });
-      }
+      res.status(201).json({
+        success: true,
+        message: `Pet ${pet.name} created successfully`,
+        payload: pet,
+      });
     } catch (error) {
-      errorHandler(error as CustomError, req, res, next);
+      next(error);
     }
   }
 
-  async getAllPets(req: Request, res: Response, next: NextFunction) {
+  async getAllPets(_req: Request, res: Response, next: NextFunction) {
     try {
       const pets = await petsService.getAllPets();
+
       res.status(200).json({
         success: true,
         message: "Pets fetched successfully",
         payload: pets,
       });
     } catch (error) {
-      errorHandler(error as CustomError, req, res, next);
+      next(error);
     }
   }
 
   async getPetById(req: Request, res: Response, next: NextFunction) {
     try {
-      const { id } = req.params;
-
-      if (!id) {
-        throw ErrorDictionary.invalidRequest("Pet ID is required");
-      }
-
+      const id = req.params["id"] || "";
       const pet = await petsService.getPetById(id);
-
-      if (!pet) {
-        throw ErrorDictionary.resourceNotFound("Pet", id);
-      }
 
       res.status(200).json({
         success: true,
-        message: `Pet ${pet.name} fetched successfully`,
+        message: `Pet ${pet!.name} fetched successfully`,
         payload: pet,
       });
     } catch (error) {
-      errorHandler(error as CustomError, req, res, next);
+      next(error);
     }
   }
 
   async getPetByName(req: Request, res: Response, next: NextFunction) {
     try {
-      const { name } = req.params;
-
-      if (!name) {
-        throw ErrorDictionary.invalidRequest("Pet name is required");
-      }
-
+      const name = req.params["name"] || "";
       const pet = await petsService.getPetByName(name);
-
-      if (!pet) {
-        throw ErrorDictionary.resourceNotFound("Pet", name);
-      }
 
       res.status(200).json({
         success: true,
-        message: `Pet ${pet.name} fetched successfully`,
+        message: `Pet ${pet!.name} fetched successfully`,
         payload: pet,
       });
     } catch (error) {
-      errorHandler(error as CustomError, req, res, next);
+      next(error);
     }
   }
 
   async updatePet(req: Request, res: Response, next: NextFunction) {
     try {
-      const { id } = req.params;
+      const id = req.params["id"] || "";
       const petData = req.body;
-
-      if (!id) {
-        throw ErrorDictionary.invalidRequest("Pet ID is required");
-      }
-
-      if (!petData) {
-        throw ErrorDictionary.invalidRequest("Pet data is required");
-      }
 
       const pet = await petsService.updatePet(id, petData);
 
-      if (!pet) {
-        throw ErrorDictionary.resourceNotFound("Pet", id);
-      }
-
       res.status(200).json({
         success: true,
-        message: `Pet ${pet.name} updated successfully`,
+        message: `Pet ${pet!.name} updated successfully`,
         payload: pet,
       });
     } catch (error) {
-      errorHandler(error as CustomError, req, res, next);
+      next(error);
     }
   }
 
   async deletePet(req: Request, res: Response, next: NextFunction) {
     try {
-      const { id } = req.params;
-
-      if (!id) {
-        throw ErrorDictionary.invalidRequest("Pet ID is required");
-      }
+      const id = req.params["id"] || "";
 
       const pet = await petsService.deletePet(id);
 
-      if (!pet) {
-        const details = {
-          message: `Pet not found with id: ${id}`,
-        };
-        throw ErrorDictionary.resourceNotFound("Pet", id, details);
-      }
-
       res.status(200).json({
         success: true,
-        message: `Pet ${pet.name} deleted successfully`,
+        message: `Pet ${pet!.name} deleted successfully`,
         payload: pet,
       });
     } catch (error) {
-      errorHandler(error as CustomError, req, res, next);
+      next(error);
     }
   }
 }

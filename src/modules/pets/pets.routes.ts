@@ -25,6 +25,13 @@ router.get("/", petsController.getAllPets.bind(petsController));
 router.get("/:id", petsController.getPetById.bind(petsController));
 
 /**
+ * @route   GET /api/pets/name/:name
+ * @desc    Get a pet by name
+ * @access  Public
+ */
+router.get("/name/:name", petsController.getPetByName.bind(petsController));
+
+/**
  * @route   PUT /api/pets/:id
  * @desc    Update a pet by ID
  * @access  Public

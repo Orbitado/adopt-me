@@ -3,13 +3,20 @@ import cookieParser from "cookie-parser";
 import compression from "compression";
 import cors from "cors";
 import rateLimit from "express-rate-limit";
+
+// Config
 import { connectDb } from "./config/database";
 import { ENV } from "./config/dotenv";
+
+// Middlewares
 import { notFoundHandler } from "./middlewares/not-found-handler";
 import { errorHandler } from "./middlewares/error-handler";
 import { addLogger } from "./utils/logger";
+
+// Routes
 import petsRouter from "./modules/pets/pets.routes";
 import adoptionsRouter from "./modules/adoptions/adoptions.routes";
+import mocksRouter from "./modules/mocks/mocks.router";
 
 connectDb();
 
@@ -36,6 +43,19 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
+// app.use(
+//   session({
+//     secret: SESSION_SECRET_KEY,
+//     resave: false,
+//     saveUninitialized: true,
+//     cookie: {
+//       maxAge: SESSION_EXPIRATION_TIME,
+//       httpOnly: true,
+//       secure: NODE_ENV === "production",
+//     },
+//   }),
+// );
+
 app.use(express.json({ limit: "50kb" }));
 app.use(express.urlencoded({ extended: true, limit: "50kb" }));
 app.use(cookieParser());
@@ -52,6 +72,7 @@ app.get("/api/health", (_req: Request, res: Response) => {
 
 app.use("/api/pets", petsRouter);
 app.use("/api/adoptions", adoptionsRouter);
+app.use("/api/mocks", mocksRouter);
 
 app.use(addLogger);
 app.use(notFoundHandler);

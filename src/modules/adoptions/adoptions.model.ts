@@ -1,20 +1,20 @@
 import { Schema, model } from "mongoose";
 
 export interface IAdoption {
-  petId: Schema.Types.ObjectId;
-  userId: Schema.Types.ObjectId;
+  petId: string;
+  userId: string;
   adoptionDate: Date;
   status: string;
 }
 
 const adoptionSchema = new Schema<IAdoption>({
   petId: {
-    type: Schema.Types.ObjectId,
+    type: String,
     ref: "Pet",
     required: true,
   },
   userId: {
-    type: Schema.Types.ObjectId,
+    type: String,
     ref: "User",
     required: true,
   },

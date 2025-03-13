@@ -3,61 +3,35 @@ import { adoptionsService } from "./adoptions.service";
 import { CustomError } from "../../types/types";
 import { errorHandler } from "../../middlewares/error-handler";
 import { ErrorDictionary } from "../../utils/error-dictionary";
-import { petsService } from "../pets/pets.service";
-import { IPet } from "../pets/pets.model";
-// import { usersService } from "../users/users.service";
 
 export class AdoptionsController {
+  /**
+   * Create a new adoption
+   * POST /api/adoptions
+   */
   async createAdoption(req: Request, res: Response, next: NextFunction) {
     try {
-      const { petId, userId } = req.body;
+      const adoptionData = req.body;
+      const adoption = await adoptionsService.createAdoption(adoptionData);
 
-      if (!petId || !userId) {
-        throw ErrorDictionary.invalidRequest("Pet ID and User ID are required");
-      }
-
-      // TODO: Implement users service and uncomment this validation
-      // const user = await usersService.getUserById(userId);
-      // if (!user) {
-      //   throw ErrorDictionary.resourceNotFound("User", userId);
-      // }
-
-      const pet: IPet | null = await petsService.getPetById(petId);
-      if (!pet) {
-        throw ErrorDictionary.resourceNotFound("Pet", petId);
-      }
-
-      if (pet.isAdopted) {
-        throw ErrorDictionary.invalidRequest("Pet is already adopted");
-      }
-
-      try {
-        const adoptionData = req.body;
-        const adoption = await adoptionsService.createAdoption(adoptionData);
-
-        const updatedPet = await petsService.updatePet(petId, {
-          isAdopted: true,
-        });
-
-        res.status(201).json({
-          success: true,
-          message: `Adoption ${adoption.id} created successfully`,
-          payload: { adoption, pet: updatedPet },
-        });
-      } catch (error) {
-        throw ErrorDictionary.internalServerError(
-          "Failed to complete adoption process",
-          (error as Error).message,
-        );
-      }
+      res.status(201).json({
+        success: true,
+        message: `Adoption created successfully`,
+        payload: adoption,
+      });
     } catch (error) {
       errorHandler(error as CustomError, req, res, next);
     }
   }
 
+  /**
+   * Get all adoptions
+   * GET /api/adoptions
+   */
   async getAllAdoptions(req: Request, res: Response, next: NextFunction) {
     try {
       const adoptions = await adoptionsService.getAllAdoptions();
+
       res.status(200).json({
         success: true,
         message: "Adoptions fetched successfully",
@@ -68,6 +42,10 @@ export class AdoptionsController {
     }
   }
 
+  /**
+   * Get an adoption by its ID
+   * GET /api/adoptions/:id
+   */
   async getAdoptionById(req: Request, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
@@ -91,6 +69,10 @@ export class AdoptionsController {
     }
   }
 
+  /**
+   * Update an adoption
+   * PUT /api/adoptions/:id
+   */
   async updateAdoption(req: Request, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
@@ -104,6 +86,11 @@ export class AdoptionsController {
         id,
         adoptionData,
       );
+
+      if (!updatedAdoption) {
+        throw ErrorDictionary.resourceNotFound("Adoption", id);
+      }
+
       res.status(200).json({
         success: true,
         message: `Adoption ${id} updated successfully`,
@@ -114,6 +101,10 @@ export class AdoptionsController {
     }
   }
 
+  /**
+   * Delete an adoption
+   * DELETE /api/adoptions/:id
+   */
   async deleteAdoption(req: Request, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
@@ -123,6 +114,11 @@ export class AdoptionsController {
       }
 
       const deletedAdoption = await adoptionsService.deleteAdoption(id);
+
+      if (!deletedAdoption) {
+        throw ErrorDictionary.resourceNotFound("Adoption", id);
+      }
+
       res.status(200).json({
         success: true,
         message: `Adoption ${id} deleted successfully`,
