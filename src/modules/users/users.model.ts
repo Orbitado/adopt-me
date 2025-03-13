@@ -1,48 +1,62 @@
 import { Schema, model } from "mongoose";
 
 export interface IUser {
+  firstName: string;
+  lastName: string;
   email: string;
   password: string;
-  role: "user" | "admin";
-  pets: Schema.Types.ObjectId[];
+  role: string;
+  pets: (Schema.Types.ObjectId | string)[];
 }
 
 const userSchema = new Schema<IUser>(
   {
+    firstName: {
+      type: String,
+      required: true,
+      trim: true,
+      minlength: [2, "First name must be at least 2 characters long"],
+      maxlength: [30, "First name must be less than 30 characters"],
+    },
+    lastName: {
+      type: String,
+      required: true,
+      trim: true,
+      minlength: [2, "Last name must be at least 2 characters long"],
+      maxlength: [30, "Last name must be less than 30 characters"],
+    },
     email: {
       type: String,
       required: true,
       unique: true,
-      match: [
-        /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
-        "Please enter a valid email address",
-      ],
-      minlength: [5, "Email must be at least 5 characters long"],
-      maxlength: [50, "Email must be less than 50 characters"],
+      trim: true,
+      lowercase: true,
     },
     password: {
       type: String,
       required: true,
-      minlength: [6, "Password must be at least 6 characters long"],
-      maxlength: [100, "Password must be less than 100 characters"],
+      minlength: [8, "Password must be at least 8 characters long"],
     },
     role: {
       type: String,
-      required: true,
-      enum: ["admin", "user"],
+      enum: ["user", "admin"],
       default: "user",
     },
-    pets: {
-      type: [Schema.Types.ObjectId],
-      ref: "Pet",
-      default: [],
-    },
+    pets: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Pet",
+      },
+    ],
   },
   {
     timestamps: true,
     autoIndex: true,
   },
 );
+
+userSchema.index({ email: 1 }, { unique: true });
+userSchema.index({ role: 1 });
 
 const User = model<IUser>("User", userSchema);
 

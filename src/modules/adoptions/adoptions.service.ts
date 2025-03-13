@@ -34,17 +34,7 @@ export class AdoptionsService {
       });
 
       await usersService.updateUser(userId, {
-        pets: [
-          {
-            _id: petId,
-            description: pet.description,
-            name: pet.name,
-            size: pet.size as "small" | "medium" | "large",
-            breed: pet.breed,
-            gender: pet.gender as "male" | "female",
-            birthDate: pet.birthDate,
-          },
-        ],
+        pets: [petId],
       });
 
       return adoption;
